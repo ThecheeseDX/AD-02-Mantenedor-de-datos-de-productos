@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mantenedor de Productos</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+        .search-box input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+        }
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .products-table th,
+        .products-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .products-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .products-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            background-color: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-unavailable {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+        .notification.success {
+            background-color: #2ecc71;
+        }
+        .notification.error {
+            background-color: #e74c3c;
+        }
+        .warning-message {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border: 1px solid #ffeaa7;
+            display: none;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .page-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Panel de Administración -->
+        <header>
+            <h1>Mantenedor de Productos</h1>
+            <div class="admin-info">
+                <span>Administrador: <strong>admin@restaurante.com</strong></span>
+                <button class="btn btn-danger">Cerrar Sesión</button>
+            </div>
+        </header>
+        
+        <!-- Barra de Acciones -->
+        <div class="actions-bar">
+            <button id="btn-agregar" class="btn btn-primary">+ Agregar Producto</button>
+            <div class="search-box">
+                <input type="text" id="buscar-producto" placeholder="Buscar producto...">
+                <button id="btn-buscar" class="btn btn-secondary">Buscar</button>
+            </div>
+        </div>
+        
+        <!-- Tabla de Productos -->
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th width="80">Imagen</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Ventas Asociadas</th>
+                    <th width="150">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="productos-body">
+                <!-- Las filas se llenarán con JavaScript -->
+            </tbody>
+        </table>
+        
+        <!-- Paginación -->
+        <div class="pagination" id="pagination">
+            <!-- Los botones de paginación se generarán con JavaScript -->
+        </div>
+        
+        <!-- Modal para Agregar/Editar Producto -->
+        <div id="modal-producto" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modal-titulo">Agregar Producto</h2>
+                    <button class="close-btn" id="close-modal">&times;</button>
+                </div>
+                
+                <form id="form-producto">
+                    <input type="hidden" id="producto-id">
+                    
+                    <div class="form-group">
+                        <label for="producto-nombre">Nombre del Producto *</label>
+                        <input type="text" id="producto-nombre" required placeholder="Ej: Ensalada Vega">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="producto-precio">Precio *</label>
+                            <input type="number" id="producto-precio" required placeholder="Ej: 5990" min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="producto-categoria">Categoría *</label>
+                            <select id="producto-categoria" required>
+                                <option value="">Seleccione categoría</option>
+                                <option value="hamburguesas">Hamburguesas</option>
+                                <option value="pizzas">Pizzas</option>
+                                <option value="ensaladas">Ensaladas</option>
+                                <option value="bebidas">Bebidas</option>
+                                <option value="postres">Postres</option>
+                                <option value="acompanamientos">Acompañamientos</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="producto-descripcion">Descripción</label>
+                        <textarea id="producto-descripcion" placeholder="Descripción del producto..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="producto-imagen">URL de la Imagen</label>
+                        <input type="text" id="producto-imagen" placeholder="https://ejemplo.com/imagen.jpg">
+                        <div class="image-preview" id="image-preview">
+                            <span>Vista previa de la imagen</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="producto-disponible" checked>
+                            Producto disponible
+                        </label>
+                    </div>
+                    
+                    <div class="warning-message" id="warning-ventas">
+                        Este producto tiene ventas asociadas y no puede ser eliminado.
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="btn-cancelar">Cancelar</button>
+                        <button type="submit" class="btn btn-success" id="btn-guardar">Guardar Producto</button>
+                        <button type="button" class="btn btn-danger" id="btn-eliminar" style="display: none;">Eliminar Producto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Notificación -->
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script>
+        // Datos de ejemplo de productos
+        let productos = [
+            { 
+                id: 1, 
+                nombre: "Hamburguesa Clásica", 
+                categoria: "hamburguesas", 
+                precio: 8500, 
+                descripcion: "Deliciosa hamburguesa con carne 100% vacuna, lechuga, tomate y queso cheddar.",
+                imagen: "", 
+                disponible: true, 
+                ventasAsociadas: true 
+            },
+            { 
+                id: 2, 
+                nombre: "Hamburguesa Vegana", 
+                categoria: "hamburguesas", 
+                precio: 9500, 
+                descripcion: "Hamburguesa vegetariana con base de lentejas y vegetales frescos.",
+                imagen: "", 
+                disponible: true, 
+                ventasAsociadas: false 
+            },
+            { 
+                id: 3, 
+                nombre: "Ensalada Vega", 
+                categoria: "ensaladas", 
+                precio: 5990, 
+                descripcion: "Ensalada fresca con mix de lechugas, tomate, pepino, zanahoria y aderezo especial.",
+                imagen: "", 
+                disponible: true, 
+                ventasAsociadas: true 
+            },
+            { 
+                id: 4, 
+                nombre: "Pizza Margarita", 
+                categoria: "pizzas", 
+                precio: 12000, 
+                descripcion: "Pizza clásica con salsa de tomate, mozzarella y albahaca fresca.",
+                imagen: "", 
+                disponible: true, 
+                ventasAsociadas: false 
+            },
+            { 
+                id: 5, 
+                nombre: "Coca-Cola 500ml", 
+                categoria: "bebidas", 
+                precio: 2000, 
+                descripcion: "Refresco Coca-Cola en presentación de 500ml.",
+                imagen: "", 
+                disponible: true, 
+                ventasAsociadas: true 
+            },
+            { 
+                id: 6, 
+                nombre: "Helado de Vainilla", 
+                categoria: "postres", 
+                precio: 3500, 
+                descripcion: "Delicioso helado de vainilla artesanal.",
+                imagen: "", 
+                disponible: false, 
+                ventasAsociadas: false 
+            }
+        ];
+
+        // Elementos del DOM
+        const productosBody = document.getElementById('productos-body');
+        const modalProducto = document.getElementById('modal-producto');
+        const modalTitulo = document.getElementById('modal-titulo');
+        const formProducto = document.getElementById('form-producto');
+        const closeModal = document.getElementById('close-modal');
+        const btnCancelar = document.getElementById('btn-cancelar');
+        const btnAgregar = document.getElementById('btn-agregar');
+        const btnGuardar = document.getElementById('btn-guardar');
+        const btnEliminar = document.getElementById('btn-eliminar');
+        const notification = document.getElementById('notification');
+        const imagePreview = document.getElementById('image-preview');
+        const productoImagen = document.getElementById('producto-imagen');
+        const warningVentas = document.getElementById('warning-ventas');
+
+        // Variables de estado
+        let productoEditando = null;
+        let productosFiltrados = [...productos];
+        const productosPorPagina = 5;
+        let paginaActual = 1;
+
+        // Función para mostrar notificación
+        function mostrarNotificacion(mensaje, tipo) {
+            notification.textContent = mensaje;
+            notification.className = `notification ${tipo}`;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Función para formatear precio
+        function formatearPrecio(precio) {
+            return '$' + precio.toLocaleString('es-CL');
+        }
+
+        // Función para renderizar productos
+        function renderizarProductos() {
+            productosBody.innerHTML = '';
+            
+            // Calcular productos para la página actual
+            const inicio = (paginaActual - 1) * productosPorPagina;
+            const fin = inicio + productosPorPagina;
+            const productosPagina = productosFiltrados.slice(inicio, fin);
+            
+            if (productosPagina.length === 0) {
+                productosBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px;">
+                            No se encontraron productos
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            productosPagina.forEach(producto => {
+                const fila = document.createElement('tr');
+                
+                fila.innerHTML = `
+                    <td>
+                        <div class="product-image">
+                            ${producto.imagen ? `<img src="${producto.imagen}" alt="${producto.nombre}">` : 'Sin imagen'}
+                        </div>
+                    </td>
+                    <td>${producto.nombre}</td>
+                    <td>${producto.categoria}</td>
+                    <td>${formatearPrecio(producto.precio)}</td>
+                    <td>
+                        <span class="status-badge ${producto.disponible ? 'status-available' : 'status-unavailable'}">
+                            ${producto.disponible ? 'Disponible' : 'No Disponible'}
+                        </span>
+                    </td>
+                    <td>${producto.ventasAsociadas ? 'Sí' : 'No'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-editar" data-id="${producto.id}">Editar</button>
+                            <button class="btn btn-danger btn-eliminar" data-id="${producto.id}">Eliminar</button>
+                        </div>
+                    </td>
+                `;
+                
+                productosBody.appendChild(fila);
+            });
+            
+            // Actualizar paginación
+            actualizarPaginacion();
+            
+            // Agregar eventos a los botones
+            document.querySelectorAll('.btn-editar').forEach(btn => {
+                btn.addEventListener('click', () => editarProducto(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.btn-eliminar').forEach(btn => {
+                btn.addEventListener('click', () => eliminarProducto(parseInt(btn.dataset.id)));
+            });
+        }
+
+        // Función para actualizar paginación
+        function actualizarPaginacion() {
+            const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            if (totalPaginas <= 1) return;
+            
+            for (let i = 1; i <= totalPaginas; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === paginaActual ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    paginaActual = i;
+                    renderizarProductos();
+                });
+                pagination.appendChild(pageBtn);
+            }
+        }
+
+        // Función para abrir modal de producto
+        function abrirModal(producto = null) {
+            productoEditando = producto;
+            
+            if (producto) {
+                modalTitulo.textContent = 'Editar Producto';
+                document.getElementById('producto-id').value = producto.id;
+                document.getElementById('producto-nombre').value = producto.nombre;
+                document.getElementById('producto-precio').value = producto.precio;
+                document.getElementById('producto-categoria').value = producto.categoria;
+                document.getElementById('producto-descripcion').value = producto.descripcion || '';
+                document.getElementById('producto-imagen').value = producto.imagen || '';
+                document.getElementById('producto-disponible').checked = producto.disponible;
+                
+                // Mostrar/ocultar botón eliminar y advertencia
+                btnEliminar.style.display = 'block';
+                warningVentas.style.display = producto.ventasAsociadas ? 'block' : 'none';
+                
+                // Actualizar vista previa de imagen
+                actualizarVistaPreviaImagen(producto.imagen);
+            } else {
+                modalTitulo.textContent = 'Agregar Producto';
+                formProducto.reset();
+                btnEliminar.style.display = 'none';
+                warningVentas.style.display = 'none';
+                imagePreview.innerHTML = '<span>Vista previa de la imagen</span>';
+            }
+            
+            modalProducto.style.display = 'flex';
+        }
+
+        // Función para actualizar vista previa de imagen
+        function actualizarVistaPreviaImagen(url) {
+            if (url) {
+                imagePreview.innerHTML = `<img src="${url}" alt="Vista previa">`;
+            } else {
+                imagePreview.innerHTML = '<span>Vista previa de la imagen</span>';
+            }
+        }
+
+        // Función para cerrar modal
+        function cerrarModal() {
+            modalProducto.style.display = 'none';
+            productoEditando = null;
+        }
+
+        // Función para guardar producto
+        function guardarProducto(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('producto-id').value;
+            const nombre = document.getElementById('producto-nombre').value.trim();
+            const precio = parseInt(document.getElementById('producto-precio').value);
+            const categoria = document.getElementById('producto-categoria').value;
+            const descripcion = document.getElementById('producto-descripcion').value.trim();
+            const imagen = document.getElementById('producto-imagen').value.trim();
+            const disponible = document.getElementById('producto-disponible').checked;
+            
+            // Validaciones básicas
+            if (!nombre || !precio || !categoria) {
+                mostrarNotificacion('Por favor, complete todos los campos obligatorios.', 'error');
+                return;
+            }
+            
+            if (productoEditando) {
+                // Editar producto existente
+                const index = productos.findIndex(p => p.id === productoEditando.id);
+                if (index !== -1) {
+                    productos[index] = {
+                        ...productos[index],
+                        nombre,
+                        precio,
+                        categoria,
+                        descripcion,
+                        imagen,
+                        disponible
+                    };
+                    
+                    mostrarNotificacion('Producto actualizado correctamente.', 'success');
+                }
+            } else {
+                // Agregar nuevo producto
+                const nuevoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
+                const nuevoProducto = {
+                    id: nuevoId,
+                    nombre,
+                    precio,
+                    categoria,
+                    descripcion,
+                    imagen,
+                    disponible,
+                    ventasAsociadas: false
+                };
+                
+                productos.unshift(nuevoProducto);
+                mostrarNotificacion('Producto agregado correctamente.', 'success');
+            }
+            
+            // Actualizar la vista
+            productosFiltrados = [...productos];
+            paginaActual = 1;
+            renderizarProductos();
+            cerrarModal();
+        }
+
+        // Función para editar producto
+        function editarProducto(id) {
+            const producto = productos.find(p => p.id === id);
+            if (producto) {
+                abrirModal(producto);
+            }
+        }
+
+        // Función para eliminar producto
+        function eliminarProducto(id) {
+            const producto = productos.find(p => p.id === id);
+            
+            if (!producto) return;
+            
+            if (producto.ventasAsociadas) {
+                mostrarNotificacion('No se puede eliminar un producto con ventas asociadas.', 'error');
+                return;
+            }
+            
+            if (confirm(`¿Está seguro de que desea eliminar el producto "${producto.nombre}"?`)) {
+                productos = productos.filter(p => p.id !== id);
+                productosFiltrados = [...productos];
+                paginaActual = 1;
+                renderizarProductos();
+                mostrarNotificacion('Producto eliminado correctamente.', 'success');
+            }
+        }
+
+        // Función para buscar productos
+        function buscarProductos() {
+            const busqueda = document.getElementById('buscar-producto').value.toLowerCase();
+            
+            if (busqueda) {
+                productosFiltrados = productos.filter(p => 
+                    p.nombre.toLowerCase().includes(busqueda) ||
+                    p.categoria.toLowerCase().includes(busqueda)
+                );
+            } else {
+                productosFiltrados = [...productos];
+            }
+            
+            paginaActual = 1;
+            renderizarProductos();
+        }
+
+        // Event Listeners
+        btnAgregar.addEventListener('click', () => abrirModal());
+        closeModal.addEventListener('click', cerrarModal);
+        btnCancelar.addEventListener('click', cerrarModal);
+        formProducto.addEventListener('submit', guardarProducto);
+        document.getElementById('btn-buscar').addEventListener('click', buscarProductos);
+        document.getElementById('buscar-producto').addEventListener('keyup', buscarProductos);
+        productoImagen.addEventListener('input', () => {
+            actualizarVistaPreviaImagen(productoImagen.value);
+        });
+        
+        // Cerrar modal al hacer clic fuera del contenido
+        window.addEventListener('click', (e) => {
+            if (e.target === modalProducto) {
+                cerrarModal();
+            }
+        });
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarProductos();
+        });
+    </script>
+</body>
+</html>
